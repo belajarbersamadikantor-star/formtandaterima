@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Tanda Terima — PT. Rumah Mulya Nusantara</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root{
+    --marine:#0B4F71;
+    --marine-dark:#083A54;
+    --teal:#1C8C9C;
+    --paper:#FBFAF7;
+    --ink:#1F2626;
+    --slate:#6B7A80;
+    --amber:#D98E04;
+    --line:#D9D3C4;
+    --ok:#1C8C4A;
+    --danger:#B34237;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .app{max-width:920px;margin:0 auto;padding:20px 16px 60px;}
+
+  /* header / brand */
+  .brand{
+    display:flex;align-items:center;gap:14px;
+    padding:18px 20px;
+    background:var(--marine);
+    border-radius:10px;
+    color:#fff;
+    margin-bottom:18px;
+  }
+  .brand-mark{
+    width:42px;height:42px;flex:none;
+    display:grid;place-items:center;
+  }
+  .brand-text h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:16px;margin:0;letter-spacing:.3px;
+  }
+  .brand-text p{margin:2px 0 0;font-size:11.5px;color:#CFE3EC;}
+
+  /* tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:2px solid var(--line);}
+  .tab-btn{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;font-size:13.5px;
+    background:none;border:none;cursor:pointer;
+    padding:10px 16px;color:var(--slate);
+    border-bottom:3px solid transparent;
+    margin-bottom:-2px;
+  }
+  .tab-btn.active{color:var(--marine);border-bottom-color:var(--teal);}
+
+  /* form sheet */
+  .sheet{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    position:relative;
+    overflow:hidden;
+  }
+  .sheet::before{
+    content:"";
+    position:absolute;left:0;top:0;bottom:0;width:6px;
+    background:repeating-linear-gradient(180deg,var(--teal) 0 8px, transparent 8px 16px);
+    opacity:.55;
+  }
+  .sheet-inner{padding:26px 26px 30px 32px;}
+
+  .serial{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;color:var(--slate);
+    display:flex;align-items:center;gap:8px;
+    margin-bottom:18px;
+  }
+  .serial input{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;color:var(--marine-dark);
+    border:1px dashed var(--line);
+    background:#FAF8F2;
+    border-radius:6px;padding:5px 8px;
+    width:210px;
+  }
+
+  h2.section-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--teal);margin:26px 0 10px;
+  }
+  h2.section-title:first-of-type{margin-top:0;}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:640px){.row{grid-template-columns:1fr;}}
+
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;font-size:12.5px;font-weight:600;
+    color:var(--slate);margin-bottom:5px;
+  }
+  .field label .req{color:var(--danger);}
+  .field input[type=text],
+  .field input[type=date],
+  .field input[type=number],
+  .field select,
+  .field textarea{
+    width:100%;padding:9px 11px;
+    border:1px solid var(--line);border-radius:7px;
+    font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);
+    background:#fff;
+  }
+  .field textarea{resize:vertical;min-height:56px;}
+  .field input:focus,.field select:focus,.field textarea:focus{
+    outline:2px solid var(--teal);outline-offset:1px;
+  }
+
+  .sig-box{
+    border:1px solid var(--line);border-radius:8px;
+    background:#FCFBF7;padding:10px;
+  }
+  .sig-box canvas{
+    width:100%;height:140px;
+    border-bottom:1px dashed var(--slate);
+    touch-action:none;cursor:crosshair;
+    background:#fff;border-radius:4px;
+  }
+  .sig-tools{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+  .sig-name-label{font-size:12px;color:var(--slate);text-align:center;margin-top:6px;}
+  .link-btn{
+    background:none;border:none;color:var(--teal);font-size:12px;
+    cursor:pointer;font-weight:600;padding:0;
+  }
+
+  .foto-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .foto-slot{
+    border:1.5px dashed var(--line);border-radius:8px;
+    padding:10px;text-align:center;background:#FCFBF7;
+  }
+  .foto-slot img{max-width:100%;max-height:130px;border-radius:5px;margin-top:8px;}
+  .foto-slot input[type=file]{font-size:12px;}
+
+  .actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;}
+  .btn{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;
+    padding:11px 20px;border-radius:8px;border:none;cursor:pointer;
+  }
+  .btn-primary{background:var(--marine);color:#fff;}
+  .btn-primary:hover{background:var(--marine-dark);}
+  .btn-ghost{background:none;color:var(--slate);border:1px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--slate);}
+
+  .hint{font-size:12px;color:var(--slate);margin-top:6px;}
+  .status-msg{
+    font-size:13px;padding:9px 12px;border-radius:7px;margin-top:14px;display:none;
+  }
+  .status-msg.ok{display:block;background:#E9F6EE;color:var(--ok);}
+  .status-msg.err{display:block;background:#FBEAE8;color:var(--danger);}
+
+  /* riwayat / spreadsheet */
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+  .toolbar .count{font-size:12.5px;color:var(--slate);}
+  table.ledger{
+    width:100%;border-collapse:collapse;background:#fff;
+    border:1px solid var(--line);border-radius:8px;overflow:hidden;
+    font-size:12.5px;
+  }
+  table.ledger th{
+    background:var(--marine);color:#fff;text-align:left;
+    padding:9px 10px;font-family:'Space Grotesk',sans-serif;font-weight:600;
+    white-space:nowrap;
+  }
+  table.ledger td{
+    padding:8px 10px;border-top:1px solid var(--line);vertical-align:top;
+  }
+  table.ledger tr:nth-child(even) td{background:#FAF8F2;}
+  .no-mono{font-family:'IBM Plex Mono',monospace;color:var(--marine-dark);}
+  .row-actions{display:flex;gap:8px;}
+  .row-actions button{
+    font-size:11.5px;font-weight:600;border:none;background:none;cursor:pointer;
+    color:var(--teal);padding:0;
+  }
+  .row-actions button.del{color:var(--danger);}
+  .empty-state{
+    text-align:center;padding:40px 20px;color:var(--slate);font-size:13.5px;
+    border:1px dashed var(--line);border-radius:8px;background:#fff;
+  }
+  .shared-note{font-size:11.5px;color:var(--slate);margin-top:8px;}
+
+  /* modal */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(11,79,113,.35);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:16px;
+  }
+  .modal-bg.show{display:flex;}
+  .modal{
+    background:#fff;border-radius:10px;max-width:380px;width:100%;
+    padding:24px;text-align:center;
+  }
+  .modal h3{font-family:'Space Grotesk',sans-serif;margin:0 0 8px;color:var(--marine);}
+  .modal p{font-size:13.5px;color:var(--slate);margin:0 0 18px;}
+  .modal .btn{width:100%;margin-bottom:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="brand">
+    <div class="brand-mark">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <circle cx="14" cy="20" r="10" stroke="#fff" stroke-width="2.4"/>
+        <circle cx="26" cy="20" r="10" stroke="#7FD3D9" stroke-width="2.4"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <h1>PT. RUMAH MULYA NUSANTARA</h1>
+      <p>Maguwoharjo, Sleman, Yogyakarta &nbsp;·&nbsp; Formulir Tanda Terima Digital</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="form">Isi Formulir</button>
+    <button class="tab-btn" data-tab="riwayat">Riwayat (Spreadsheet)</button>
+  </div>
+
+  <!-- FORM TAB -->
+  <div id="tab-form">
+    <div class="sheet">
+      <div class="sheet-inner">
+
+        <div class="serial">
+          No. Surat
+          <input type="text" id="f-noSurat" />
+          <button class="link-btn" id="regenNo" type="button">Buat ulang otomatis</button>
+        </div>
+
+        <h2 class="section-title">Jenis & Pihak</h2>
+        <div class="field">
+          <label>Jenis Transaksi <span class="req">*</span></label>
+          <select id="f-jenis">
+            <option value="masuk">Alat Masuk (Diterima untuk Servis)</option>
+            <option value="keluar">Alat Keluar (Selesai Servis)</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Telah diterima dari <span class="req">*</span></label>
+            <input type="text" id="f-dari" placeholder="cth. Lab Farmasi UII">
+          </div>
+          <div class="field">
+            <label>Kepada <span class="req">*</span></label>
+            <input type="text" id="f-kepada" placeholder="cth. PT. Rumah Mulya Nusantara">
+          </div>
+        </div>
+
+        <h2 class="section-title">Detail Barang</h2>
+        <div class="row">
+          <div class="field">
+            <label>Berupa (nama alat) <span class="req">*</span></label>
+            <input type="text" id="f-berupa" placeholder="cth. Dispenseter Brand">
+          </div>
+          <div class="field">
+            <label>Sebanyak <span class="req">*</span></label>
+            <input type="text" id="f-jumlah" placeholder="cth. 1 set">
+          </div>
+        </div>
+        <div class="field">
+          <label>Keterangan</label>
+          <textarea id="f-keterangan" placeholder="cth. alat akan dibawa untuk service"></textarea>
+        </div>
+        <div class="field" style="max-width:220px;">
+          <label>Tanggal <span class="req">*</span></label>
+          <input type="date" id="f-tanggal">
+        </div>
+
+        <h2 class="section-title">Tanda Tangan</h2>
+        <div class="row">
+          <div class="field">
+            <label>Pemberi</label>
+            <input type="text" id="f-pemberiNama" placeholder="Nama pemberi" style="margin-bottom:8px;">
+            <div class="sig-box">
+              <canvas id="sig-pemberi"></canvas>
+              <div class="sig-tools">
+                <span class="sig-name-label">Tanda tangan pemberi</span>
+                <button class="link-btn" type="button" data-clear="sig-pemberi">Hapus</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Penerima</label>
+            <input type="text" id="f-penerimaNama" placeholder="Nama penerima" style="margin-bottom:8px;">
+            <div class="sig-box">
+              <canvas id="sig-penerima"></canvas>
+              <div class="sig-tools">
+                <span class="sig-name-label">Tanda tangan penerima</span>
+                <button class="link-btn" type="button" data-clear="sig-penerima">Hapus</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Dokumentasi (opsional)</h2>
+        <div class="foto-grid">
+          <div class="foto-slot">
+            <input type="file" accept="image/*" id="f-foto1">
+            <div id="preview-foto1"></div>
+          </div>
+          <div class="foto-slot">
+            <input type="file" accept="image/*" id="f-foto2">
+            <div id="preview-foto2"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="btnSubmit">Simpan & Buat PDF</button>
+          <button class="btn btn-ghost" id="btnReset" type="button">Bersihkan Formulir</button>
+        </div>
+        <div class="status-msg" id="statusMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIWAYAT TAB -->
+  <div id="tab-riwayat" style="display:none;">
+    <div class="toolbar">
+      <span class="count" id="ledgerCount">Memuat data…</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" id="btnExportCsv" type="button">Ekspor CSV</button>
+        <button class="btn btn-ghost" id="btnRefresh" type="button">Muat ulang</button>
+      </div>
+    </div>
+    <div id="ledgerWrap"><div class="empty-state">Memuat riwayat…</div></div>
+    <p class="shared-note">Data pada riwayat ini disimpan langsung ke Google Sheets kamu — bisa dibuka & diedit juga langsung dari Sheets kapan saja.</p>
+  </div>
+
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>PDF siap</h3>
+    <p>Tanda Terima berhasil dibuat dan tersimpan ke riwayat.</p>
+    <button class="btn btn-primary" id="modalDownload">Unduh PDF</button>
+    <button class="btn btn-ghost" id="modalClose">Tutup</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  const { jsPDF } = window.jspdf;
+
+  /* =====================================================================
+     GANTI URL DI BAWAH INI dengan URL Web App Google Apps Script kamu.
+     Lihat panduan deploy untuk cara mendapatkannya.
+     ===================================================================== */
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1hXdsazvlFJf3gR2Cbxn-0_vDKOQ-WGuLGpVGxiM6sEVryaMOpy_yXhXp40JiVO7jeg/exec';
+
+  if (SCRIPT_URL.indexOf('PASTE_URL') === 0) {
+    window.addEventListener('DOMContentLoaded', ()=>{
+      const warn = document.createElement('div');
+      warn.style.cssText = 'background:#FBEAE8;color:#B34237;padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:14px;max-width:920px;margin-left:auto;margin-right:auto;';
+      warn.textContent = 'Belum terhubung ke Google Sheets: buka file HTML ini di editor teks, cari SCRIPT_URL, dan tempel URL Web App Apps Script kamu di sana.';
+      document.body.insertBefore(warn, document.body.firstChild);
+    });
+  }
+
+  /* ---------- tabs ---------- */
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.getElementById('tab-form').style.display = tab==='form' ? '' : 'none';
+      document.getElementById('tab-riwayat').style.display = tab==='riwayat' ? '' : 'none';
+      if(tab==='riwayat') loadLedger();
+    });
+  });
+
+  /* ---------- signature pads ---------- */
+  function setupSig(canvas){
+    const ctx = canvas.getContext('2d');
+    function resize(){
+      const rect = canvas.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
+      const prevData = canvas.toDataURL ? canvas.toDataURL() : null;
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+      ctx.scale(ratio, ratio);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#1F2626';
+    }
+    resize();
+    canvas._blank = canvas.toDataURL();
+    let drawing = false, last = null;
+    function pos(e){
+      const r = canvas.getBoundingClientRect();
+      return {x: e.clientX - r.left, y: e.clientY - r.top};
+    }
+    canvas.addEventListener('pointerdown', e=>{
+      drawing = true; last = pos(e); canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove', e=>{
+      if(!drawing) return;
+      const p = pos(e);
+      ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+      last = p;
+    });
+    ['pointerup','pointerleave','pointercancel'].forEach(ev=>{
+      canvas.addEventListener(ev, ()=>{ drawing = false; });
+    });
+  }
+  const sigPemberi = document.getElementById('sig-pemberi');
+  const sigPenerima = document.getElementById('sig-penerima');
+  setupSig(sigPemberi);
+  setupSig(sigPenerima);
+
+  document.querySelectorAll('[data-clear]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const canvas = document.getElementById(btn.dataset.clear);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    });
+  });
+
+  function sigDataUrl(canvas){
+    if(canvas.toDataURL() === canvas._blank) return null;
+    // downscale before storing so it fits comfortably in a Sheets cell
+    const small = document.createElement('canvas');
+    small.width = 240; small.height = 90;
+    const sctx = small.getContext('2d');
+    sctx.fillStyle = '#fff'; sctx.fillRect(0,0,240,90);
+    sctx.drawImage(canvas, 0, 0, 240, 90);
+    return small.toDataURL('image/png');
+  }
+
+  /* ---------- photo preview + resize ---------- */
+  const fotoData = { foto1:null, foto2:null };
+  function resizeImageFile(file, maxWidth){
+    return new Promise((resolve,reject)=>{
+      const reader = new FileReader();
+      reader.onload = e=>{
+        const img = new Image();
+        img.onload = ()=>{
+          const scale = Math.min(1, maxWidth / img.width);
+          const w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(c.toDataURL('image/jpeg', 0.5));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  ['foto1','foto2'].forEach(key=>{
+    document.getElementById('f-'+key).addEventListener('change', async (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const dataUrl = await resizeImageFile(file, 320);
+      fotoData[key] = dataUrl;
+      document.getElementById('preview-'+key).innerHTML = '<img src="'+dataUrl+'">';
+    });
+  });
+
+  /* ---------- serial number ---------- */
+  const roman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+  async function generateSerial(){
+    const dateVal = document.getElementById('f-tanggal').value || new Date().toISOString().slice(0,10);
+    const d = new Date(dateVal+'T00:00:00');
+    let count = 1;
+    try{
+      const res = await fetch(SCRIPT_URL+'?action=list');
+      const json = await res.json();
+      if(json && json.records) count = json.records.length + 1;
+    }catch(err){ /* ignore, default to 1 */ }
+    const num = String(count).padStart(3,'0');
+    return num+'/RMN/TT/'+roman[d.getMonth()]+'/'+d.getFullYear();
+  }
+  async function refreshSerial(){
+    document.getElementById('f-noSurat').value = await generateSerial();
+  }
+  document.getElementById('regenNo').addEventListener('click', refreshSerial);
+  document.getElementById('f-tanggal').valueAsDate = new Date();
+  refreshSerial();
+
+  /* ---------- status message ---------- */
+  function showStatus(msg, ok){
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = 'status-msg ' + (ok ? 'ok':'err');
+  }
+
+  /* ---------- PDF generation ---------- */
+  function jenisLabel(jenis){
+    return jenis === 'keluar' ? 'ALAT KELUAR (SELESAI SERVIS)' : 'ALAT MASUK (DITERIMA UNTUK SERVIS)';
+  }
+
+  function buildPdf(d){
+    const doc = new jsPDF({unit:'mm', format:'a4'});
+    const pageW = 210, marginX = 15;
+    let y = 20;
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(20,20,20);
+    doc.text('PT. RUMAH MULYA NUSANTARA', marginX+30, y);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90,90,90);
+    doc.text('Maguwoharjo, Sleman, Yogyakarta', marginX+30, y+5);
+    doc.text('Phone. 0857-4366-1020 | https://ruanglab.com', marginX+30, y+9.5);
+
+    // brand mark circles
+    doc.setDrawColor(11,79,113); doc.setLineWidth(1);
+    doc.circle(marginX+9, y-2, 5.2);
+    doc.setDrawColor(28,140,156);
+    doc.circle(marginX+16, y-2, 5.2);
+
+    y += 22;
+    doc.setTextColor(20,20,20);
+    doc.setFont('helvetica','bold'); doc.setFontSize(17);
+    doc.text('TANDA TERIMA', pageW/2, y, {align:'center'});
+    y += 7;
+    doc.setFontSize(10); doc.setTextColor(11,79,113);
+    doc.text(jenisLabel(d.jenis), pageW/2, y, {align:'center'});
+    y += 5.5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(60,60,60);
+    doc.text('No. '+d.noSurat, pageW/2, y, {align:'center'});
+
+    y += 8;
+    const contentW = pageW - marginX*2;
+    const colSplit = marginX + contentW*0.62;
+    doc.setDrawColor(180,175,160); doc.setLineWidth(.2);
+
+    function labelVal(x, w, label, value, boldLabel){
+      doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(90,90,90);
+      doc.text(label, x+2, y+4.5);
+      doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(20,20,20);
+      const lines = doc.splitTextToSize(value || '-', w-4);
+      doc.text(lines, x+2, y+10);
+      return lines.length;
+    }
+
+    // row: dari / kepada
+    let rowH = 16;
+    doc.rect(marginX, y, contentW, rowH);
+    doc.line(colSplit, y, colSplit, y+rowH);
+    labelVal(marginX, colSplit-marginX, 'Telah diterima dari :', d.dari);
+    labelVal(colSplit, marginX+contentW-colSplit, 'Kepada :', d.kepada);
+    y += rowH;
+
+    // row: berupa / sebanyak
+    doc.rect(marginX, y, contentW, rowH);
+    doc.line(colSplit, y, colSplit, y+rowH);
+    labelVal(marginX, colSplit-marginX, 'BERUPA :', d.berupa);
+    labelVal(colSplit, marginX+contentW-colSplit, 'SEBANYAK :', d.jumlah);
+    y += rowH;
+
+    // row: keterangan
+    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(90,90,90);
+    const ketLines = doc.splitTextToSize(d.keterangan || '-', contentW-4);
+    const ketRowH = Math.max(14, 8 + ketLines.length*5);
+    doc.rect(marginX, y, contentW, ketRowH);
+    doc.text('Keterangan :', marginX+2, y+4.5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(20,20,20);
+    doc.text(ketLines, marginX+2, y+9.5);
+    y += ketRowH;
+
+    // row: tanggal
+    doc.rect(marginX, y, contentW, 8);
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(20,20,20);
+    const tglFmt = d.tanggal ? d.tanggal.split('-').reverse().join('-') : '-';
+    doc.text('Tanggal : '+d.tanggal, marginX+2, y+5.5);
+    y += 8;
+
+    // signatures
+    y += 12;
+    const sigColW = contentW/2;
+    doc.setFontSize(10.5);
+    doc.text('Pemberi,', marginX+4, y);
+    doc.text('Penerima,', marginX+sigColW+4, y);
+
+    const sigImgW = 45, sigImgH = 18;
+    if(d.sigPemberi){
+      try{ doc.addImage(d.sigPemberi,'PNG', marginX+2, y+3, sigImgW, sigImgH); }catch(e){}
+    }
+    if(d.sigPenerima){
+      try{ doc.addImage(d.sigPenerima,'PNG', marginX+sigColW+2, y+3, sigImgW, sigImgH); }catch(e){}
+    }
+    y += sigImgH + 12;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10);
+    doc.text('( '+(d.pemberiNama||'.......................')+' )', marginX+4, y);
+    doc.text('( '+(d.penerimaNama||'.......................')+' )', marginX+sigColW+4, y);
+
+    // dokumentasi
+    if(d.foto1 || d.foto2){
+      y += 14;
+      doc.setFont('helvetica','bold'); doc.setFontSize(10.5);
+      doc.text('\u2756 Dokumentasi', marginX, y);
+      y += 6;
+      const imgW = (contentW-6)/2, imgH = 55;
+      if(d.foto1){ try{ doc.addImage(d.foto1,'JPEG', marginX, y, imgW, imgH); }catch(e){} }
+      if(d.foto2){ try{ doc.addImage(d.foto2,'JPEG', marginX+imgW+6, y, imgW, imgH); }catch(e){} }
+    }
+
+    return doc;
+  }
+
+  /* ---------- validation & submit ---------- */
+  function getFormData(){
+    return {
+      noSurat: document.getElementById('f-noSurat').value.trim(),
+      jenis: document.getElementById('f-jenis').value,
+      dari: document.getElementById('f-dari').value.trim(),
+      kepada: document.getElementById('f-kepada').value.trim(),
+      berupa: document.getElementById('f-berupa').value.trim(),
+      jumlah: document.getElementById('f-jumlah').value.trim(),
+      keterangan: document.getElementById('f-keterangan').value.trim(),
+      tanggal: document.getElementById('f-tanggal').value,
+      pemberiNama: document.getElementById('f-pemberiNama').value.trim(),
+      penerimaNama: document.getElementById('f-penerimaNama').value.trim(),
+      sigPemberi: sigDataUrl(sigPemberi),
+      sigPenerima: sigDataUrl(sigPenerima),
+      foto1: fotoData.foto1,
+      foto2: fotoData.foto2,
+    };
+  }
+
+  function validate(d){
+    if(!d.dari) return 'Kolom "Telah diterima dari" wajib diisi.';
+    if(!d.kepada) return 'Kolom "Kepada" wajib diisi.';
+    if(!d.berupa) return 'Kolom "Berupa" wajib diisi.';
+    if(!d.jumlah) return 'Kolom "Sebanyak" wajib diisi.';
+    if(!d.tanggal) return 'Tanggal wajib diisi.';
+    return null;
+  }
+
+  let lastBlobUrl = null;
+
+  document.getElementById('btnSubmit').addEventListener('click', async ()=>{
+    const d = getFormData();
+    const err = validate(d);
+    if(err){ showStatus(err, false); return; }
+    document.getElementById('btnSubmit').disabled = true;
+    document.getElementById('btnSubmit').textContent = 'Menyimpan…';
+    try{
+      const id = 'sub_'+Date.now();
+      const record = Object.assign({action:'create', id}, d);
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'}, // avoids CORS preflight on Apps Script
+        body: JSON.stringify(record)
+      });
+      const resJson = await res.json();
+      if(resJson.error) throw new Error(resJson.error);
+
+      const doc = buildPdf(d);
+      const blob = doc.output('blob');
+      if(lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
+      lastBlobUrl = URL.createObjectURL(blob);
+
+      showStatus('Tersimpan! Data masuk ke Riwayat / Spreadsheet.', true);
+      document.getElementById('modalBg').classList.add('show');
+      document.getElementById('modalDownload').onclick = ()=>{
+        const a = document.createElement('a');
+        a.href = lastBlobUrl;
+        a.download = 'Tanda-Terima-'+d.noSurat.replace(/\//g,'-')+'.pdf';
+        a.click();
+      };
+    }catch(e){
+      console.error(e);
+      showStatus('Gagal menyimpan data: '+e.message, false);
+    }finally{
+      document.getElementById('btnSubmit').disabled = false;
+      document.getElementById('btnSubmit').textContent = 'Simpan & Buat PDF';
+    }
+  });
+
+  document.getElementById('modalClose').addEventListener('click', ()=>{
+    document.getElementById('modalBg').classList.remove('show');
+  });
+
+  document.getElementById('btnReset').addEventListener('click', ()=>{
+    ['f-dari','f-kepada','f-berupa','f-jumlah','f-keterangan','f-pemberiNama','f-penerimaNama'].forEach(id=>{
+      document.getElementById(id).value = '';
+    });
+    [sigPemberi, sigPenerima].forEach(c=>c.getContext('2d').clearRect(0,0,c.width,c.height));
+    fotoData.foto1 = null; fotoData.foto2 = null;
+    document.getElementById('preview-foto1').innerHTML = '';
+    document.getElementById('preview-foto2').innerHTML = '';
+    document.getElementById('f-foto1').value = '';
+    document.getElementById('f-foto2').value = '';
+    document.getElementById('statusMsg').className = 'status-msg';
+    refreshSerial();
+  });
+
+  /* ---------- ledger / riwayat ---------- */
+  function csvEscape(v){
+    v = (v==null?'':String(v));
+    if(/[",\n]/.test(v)) return '"'+v.replace(/"/g,'""')+'"';
+    return v;
+  }
+
+  let cachedRecords = [];
+
+  async function loadLedger(){
+    const wrap = document.getElementById('ledgerWrap');
+    const countEl = document.getElementById('ledgerCount');
+    wrap.innerHTML = '<div class="empty-state">Memuat riwayat…</div>';
+    try{
+      const res = await fetch(SCRIPT_URL+'?action=list');
+      const json = await res.json();
+      if(json.error) throw new Error(json.error);
+      const records = json.records || [];
+      records.sort((a,b)=> (b.createdAt||'').localeCompare(a.createdAt||''));
+      cachedRecords = records;
+      countEl.textContent = records.length + ' entri tersimpan';
+      if(records.length === 0){
+        wrap.innerHTML = '<div class="empty-state">Belum ada data. Isi formulir untuk menambah entri pertama.</div>';
+        return;
+      }
+      let html = '<table class="ledger"><thead><tr>'+
+        '<th>No.</th><th>Tanggal</th><th>Jenis</th><th>Dari</th><th>Kepada</th>'+
+        '<th>Berupa</th><th>Jumlah</th><th>Pemberi</th><th>Penerima</th><th>Aksi</th>'+
+        '</tr></thead><tbody>';
+      records.forEach(r=>{
+        html += '<tr>'+
+          '<td class="no-mono">'+(r.noSurat||'-')+'</td>'+
+          '<td>'+(r.tanggal||'-')+'</td>'+
+          '<td>'+(r.jenis==='keluar'?'Keluar':'Masuk')+'</td>'+
+          '<td>'+(r.dari||'-')+'</td>'+
+          '<td>'+(r.kepada||'-')+'</td>'+
+          '<td>'+(r.berupa||'-')+'</td>'+
+          '<td>'+(r.jumlah||'-')+'</td>'+
+          '<td>'+(r.pemberiNama||'-')+'</td>'+
+          '<td>'+(r.penerimaNama||'-')+'</td>'+
+          '<td class="row-actions">'+
+            '<button data-id="'+r.id+'" class="dl">Unduh PDF</button>'+
+            '<button data-id="'+r.id+'" class="del">Hapus</button>'+
+          '</td>'+
+        '</tr>';
+      });
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+
+      wrap.querySelectorAll('button.dl').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const r = cachedRecords.find(x=>x.id===btn.dataset.id);
+          if(!r) return;
+          const doc = buildPdf(r);
+          doc.save('Tanda-Terima-'+(r.noSurat||r.id).replace(/\//g,'-')+'.pdf');
+        });
+      });
+      wrap.querySelectorAll('button.del').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          if(!confirm('Hapus entri ini dari riwayat?')) return;
+          try{
+            await fetch(SCRIPT_URL, {
+              method:'POST',
+              headers:{'Content-Type':'text/plain;charset=utf-8'},
+              body: JSON.stringify({action:'delete', id: btn.dataset.id})
+            });
+            loadLedger();
+          }catch(e){ alert('Gagal menghapus: '+e.message); }
+        });
+      });
+    }catch(e){
+      wrap.innerHTML = '<div class="empty-state">Gagal memuat data: '+e.message+'</div>';
+      countEl.textContent = '';
+    }
+  }
+
+  document.getElementById('btnRefresh').addEventListener('click', loadLedger);
+
+  document.getElementById('btnExportCsv').addEventListener('click', ()=>{
+    if(cachedRecords.length === 0){ alert('Belum ada data untuk diekspor.'); return; }
+    const cols = ['noSurat','tanggal','jenis','dari','kepada','berupa','jumlah','keterangan','pemberiNama','penerimaNama','createdAt'];
+    const header = ['No Surat','Tanggal','Jenis','Dari','Kepada','Berupa','Jumlah','Keterangan','Pemberi','Penerima','Dibuat Pada'];
+    let csv = header.map(csvEscape).join(',') + '\n';
+    cachedRecords.forEach(r=>{
+      csv += cols.map(c=>csvEscape(r[c])).join(',') + '\n';
+    });
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'riwayat-tanda-terima.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+})();
+</script>
+</body>
+</html>
