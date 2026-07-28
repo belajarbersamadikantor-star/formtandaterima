@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Tanda Terima — PT. Rumah Mulya Nusantara</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
@@ -93,6 +94,23 @@
 
   .row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media (max-width:640px){.row{grid-template-columns:1fr;}}
+
+  .ledger-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table.ledger{min-width:760px;}
+
+  @media (max-width:640px){
+    .app{padding:14px 10px 50px;}
+    .sheet-inner{padding:18px 16px 22px 20px;}
+    .brand{flex-wrap:wrap;padding:14px 16px;gap:10px;}
+    .brand-text{min-width:0;flex-basis:100%;order:3;}
+    .brand-mark-rmn{height:38px;margin-left:auto;}
+    .brand-logo{height:28px;}
+    h2.section-title{font-size:12px;}
+    .foto-grid{grid-template-columns:1fr;}
+    .tab-btn{padding:10px 10px;font-size:12.5px;}
+    .actions{flex-direction:column;}
+    .actions .btn{width:100%;}
+  }
 
   .field{margin-bottom:14px;}
   .field label{
@@ -325,7 +343,7 @@
         <button class="btn btn-ghost" id="btnRefresh" type="button">Muat ulang</button>
       </div>
     </div>
-    <div id="ledgerWrap"><div class="empty-state">Memuat riwayat…</div></div>
+    <div id="ledgerWrap" class="ledger-scroll"><div class="empty-state">Memuat riwayat…</div></div>
     <p class="shared-note">Data pada riwayat ini disimpan langsung ke Google Sheets kamu — bisa dibuka & diedit juga langsung dari Sheets kapan saja.</p>
   </div>
 
