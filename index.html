@@ -491,7 +491,11 @@
               <option value="ada">Ada</option>
               <option value="tidak">Tidak</option>
             </select>
-            <span></span>
+            <select class="mini-input" id="mf-qrBerlaku">
+              <option value="">- berlaku -</option>
+              <option value="berlaku">Masih Berlaku</option>
+              <option value="tidak-berlaku">Tidak Berlaku</option>
+            </select>
             <input type="text" class="mini-input" id="mf-qrKet" placeholder="Keterangan (opsional)">
           </div>
           <div class="pelengkap-grid">
@@ -626,6 +630,13 @@
     if(currentMode === 'serah') loadLedger(); else loadMaintenanceLedger();
   }
 
+  function resizeMaintenanceSigs(){
+    const c1 = document.getElementById('sig-petugas-m');
+    const c2 = document.getElementById('sig-pengguna-m');
+    if(c1 && c1._resizeSig) c1._resizeSig();
+    if(c2 && c2._resizeSig) c2._resizeSig();
+  }
+
   document.querySelectorAll('.mode-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
@@ -637,6 +648,7 @@
       document.getElementById('riwayat-maintenance').style.display = currentMode==='maintenance' ? '' : 'none';
       const riwayatShown = document.getElementById('tab-riwayat').style.display !== 'none';
       if(riwayatShown) loadCurrentRiwayat();
+      if(currentMode==='maintenance') resizeMaintenanceSigs();
     });
   });
 
@@ -649,6 +661,7 @@
       document.getElementById('tab-form').style.display = tab==='form' ? '' : 'none';
       document.getElementById('tab-riwayat').style.display = tab==='riwayat' ? '' : 'none';
       if(tab==='riwayat') loadCurrentRiwayat();
+      if(tab==='form' && currentMode==='maintenance') resizeMaintenanceSigs();
     });
   });
 
@@ -677,25 +690,31 @@
   /* ---------- signature pads ---------- */
   function setupSig(canvas){
     const ctx = canvas.getContext('2d');
+    let sized = false;
     function resize(){
+      // canvas might still be hidden (display:none on an ancestor, e.g. mode belum aktif)
+      // — getBoundingClientRect() akan 0x0 saat itu, jadi jangan ukur/kunci ukuran dulu.
       const rect = canvas.getBoundingClientRect();
+      if(rect.width === 0 || rect.height === 0 || sized) return;
       const ratio = window.devicePixelRatio || 1;
-      const prevData = canvas.toDataURL ? canvas.toDataURL() : null;
       canvas.width = rect.width * ratio;
       canvas.height = rect.height * ratio;
       ctx.scale(ratio, ratio);
       ctx.lineWidth = 2.8;
       ctx.lineCap = 'round';
       ctx.strokeStyle = '#1F2626';
+      canvas._blank = canvas.toDataURL();
+      sized = true;
     }
+    canvas._resizeSig = resize;
     resize();
-    canvas._blank = canvas.toDataURL();
     let drawing = false, last = null;
     function pos(e){
       const r = canvas.getBoundingClientRect();
       return {x: e.clientX - r.left, y: e.clientY - r.top};
     }
     canvas.addEventListener('pointerdown', e=>{
+      resize(); // jaring pengaman: pastikan ukuran benar begitu panel-nya terlihat & disentuh
       drawing = true; last = pos(e); canvas.setPointerCapture(e.pointerId);
     });
     canvas.addEventListener('pointermove', e=>{
@@ -1241,6 +1260,7 @@
       maintenanceItems: JSON.stringify(maintenanceItems),
       media: JSON.stringify(media),
       qrStatus: document.getElementById('mf-qrStatus').value,
+      qrBerlaku: document.getElementById('mf-qrBerlaku').value,
       qrKet: document.getElementById('mf-qrKet').value.trim(),
       sopStatus: document.getElementById('mf-sopStatus').value,
       sopBerlaku: document.getElementById('mf-sopBerlaku').value,
@@ -1433,10 +1453,11 @@
     y = ensureSpaceM(doc, y, 20, pageW);
     y = sectionHeaderM(doc, 'PELENGKAP', marginX, y, contentW);
     const qrLabel = d.qrStatus==='ada' ? 'Ada' : (d.qrStatus==='tidak' ? 'Tidak' : '-');
+    const qrBerlakuLabel = d.qrBerlaku==='berlaku' ? 'Masih Berlaku' : (d.qrBerlaku==='tidak-berlaku' ? 'Tidak Berlaku' : '-');
     const sopStatusLabel = d.sopStatus==='ada' ? 'Ada' : (d.sopStatus==='tidak' ? 'Tidak' : '-');
     const sopBerlakuLabel = d.sopBerlaku==='berlaku' ? 'Masih Berlaku' : (d.sopBerlaku==='tidak-berlaku' ? 'Tidak Berlaku' : '-');
     const pelRows = [
-      ['QR Code Label', qrLabel, '-', d.qrKet || '-'],
+      ['QR Code Label', qrLabel, qrBerlakuLabel, d.qrKet || '-'],
       ['SOP Alat', sopStatusLabel, sopBerlakuLabel, d.sopKet || '-']
     ];
     y = drawTableM(doc, marginX, y, [45, 30, 40, contentW-45-30-40], ['Jenis','Status','Keberlakuan','Keterangan'], pelRows);
