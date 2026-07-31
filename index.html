@@ -218,6 +218,62 @@
   .modal h3{font-family:'Space Grotesk',sans-serif;margin:0 0 8px;color:var(--marine);}
   .modal p{font-size:13.5px;color:var(--slate);margin:0 0 18px;}
   .modal .btn{width:100%;margin-bottom:8px;}
+
+  /* mode switch (Serah Terima <-> Pemeriksaan & Maintenance) */
+  .mode-switch{
+    display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;
+  }
+  .mode-btn{
+    flex:1;min-width:200px;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;
+    padding:11px 14px;border-radius:9px;border:1.5px solid var(--line);
+    background:#fff;color:var(--slate);cursor:pointer;text-align:center;
+  }
+  .mode-btn.active{
+    background:var(--marine);border-color:var(--marine);color:#fff;
+  }
+  @media (max-width:640px){ .mode-btn{min-width:0;} }
+
+  /* editable item tables (Pemeriksaan / Maintenance / Media & Sparepart) */
+  .item-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:6px;}
+  table.item-table{
+    width:100%;min-width:560px;border-collapse:collapse;background:#fff;
+    border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12.5px;
+  }
+  table.item-table th{
+    background:var(--marine);color:#fff;text-align:left;padding:7px 8px;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11.5px;white-space:nowrap;
+  }
+  table.item-table td{
+    padding:5px 6px;border-top:1px solid var(--line);vertical-align:middle;
+  }
+  table.item-table tr:nth-child(even) td{background:#FAF8F2;}
+  table.item-table td.item-no{width:30px;text-align:center;color:var(--slate);font-family:'IBM Plex Mono',monospace;font-size:11.5px;}
+  table.item-table td.item-radio{width:52px;text-align:center;}
+  table.item-table td.item-radio input{width:16px;height:16px;}
+  .mini-input{
+    width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;
+    font-family:'Inter',sans-serif;font-size:12.5px;color:var(--ink);background:#fff;
+  }
+  .mini-input:focus{outline:2px solid var(--teal);outline-offset:1px;}
+  select.mini-input{padding:6px 6px;}
+
+  .media-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;}
+  @media (max-width:640px){ .media-row{grid-template-columns:1fr;} }
+  .media-row .del-row{
+    background:none;border:1px solid var(--line);border-radius:6px;color:var(--danger);
+    cursor:pointer;font-size:12px;padding:6px 10px;font-weight:600;
+  }
+
+  .pelengkap-grid{display:grid;grid-template-columns:110px 1fr 1fr 1.4fr;gap:8px;align-items:center;margin-bottom:8px;}
+  @media (max-width:640px){ .pelengkap-grid{grid-template-columns:1fr;} }
+  .pelengkap-grid .jenis-label{font-size:12.5px;font-weight:600;color:var(--marine-dark);}
+
+  .del-row-mini{
+    background:none;border:1px solid var(--line);border-radius:6px;color:var(--danger);
+    cursor:pointer;font-size:11px;width:24px;height:24px;line-height:1;font-weight:700;
+  }
+  table.item-table td.item-radio.aksi-col{width:34px;}
 </style>
 </head>
 <body>
@@ -232,6 +288,11 @@
     <img class="brand-mark-rmn" id="brandMarkRmn" alt="PT. Rumah Mulya Nusantara">
   </div>
 
+  <div class="mode-switch">
+    <button class="mode-btn active" data-mode="serah" type="button">Serah Terima Alat</button>
+    <button class="mode-btn" data-mode="maintenance" type="button">Pemeriksaan &amp; Maintenance Alat</button>
+  </div>
+
   <div class="tabs">
     <button class="tab-btn active" data-tab="form">Isi Formulir</button>
     <button class="tab-btn" data-tab="riwayat">Riwayat (Spreadsheet)</button>
@@ -242,6 +303,7 @@
     <div class="sheet">
       <div class="sheet-inner">
 
+        <div id="fields-serah">
         <div class="serial">
           No. Surat
           <input type="text" id="f-noSurat" />
@@ -330,21 +392,190 @@
           <button class="btn btn-ghost" id="btnReset" type="button">Bersihkan Formulir</button>
         </div>
         <div class="status-msg" id="statusMsg"></div>
+        </div><!-- /fields-serah -->
+
+        <div id="fields-maintenance" style="display:none;">
+
+          <h2 class="section-title" style="margin-top:0;">Info Alat</h2>
+          <div class="row">
+            <div class="field">
+              <label>Nama Alat <span class="req">*</span></label>
+              <input type="text" id="mf-namaAlat" placeholder="cth. PCR Workstation">
+            </div>
+            <div class="field">
+              <label>Merk/Type</label>
+              <input type="text" id="mf-merkType" placeholder="cth. Biobase / BYKG-II">
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Lokasi <span class="req">*</span></label>
+              <input type="text" id="mf-lokasi" placeholder="cth. Fakultas Perikanan UGM">
+            </div>
+            <div class="field">
+              <label>No. Seri</label>
+              <input type="text" id="mf-noSeri">
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>No. Inventaris</label>
+              <input type="text" id="mf-noInventaris">
+            </div>
+            <div class="field" style="max-width:220px;">
+              <label>Tanggal <span class="req">*</span></label>
+              <input type="date" id="mf-tanggal">
+            </div>
+          </div>
+
+          <h2 class="section-title">Kondisi Lingkungan</h2>
+          <div class="row">
+            <div class="field">
+              <label>Nama Ruang</label>
+              <input type="text" id="mf-namaRuang">
+            </div>
+            <div class="field">
+              <label>Temperature (˚C)</label>
+              <input type="text" id="mf-temperature" placeholder="cth. 24">
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Kelembaban (%RH)</label>
+              <input type="text" id="mf-kelembaban" placeholder="cth. 55">
+            </div>
+            <div class="field">
+              <label>Power Phase (phase)</label>
+              <input type="text" id="mf-powerPhase" placeholder="cth. 1 phase">
+            </div>
+          </div>
+          <div class="field" style="max-width:220px;">
+            <label>Tegangan (V)</label>
+            <input type="text" id="mf-tegangan" placeholder="cth. 220">
+          </div>
+
+          <h2 class="section-title">Kendala</h2>
+          <div class="field">
+            <label>Catatan kendala (opsional)</label>
+            <textarea id="mf-kendala" placeholder="cth. alat tidak menyala saat start"></textarea>
+          </div>
+
+          <h2 class="section-title">Tindakan Pemeriksaan</h2>
+          <div class="item-table-scroll">
+            <table class="item-table">
+              <thead><tr><th>No</th><th>Item Pemeriksaan</th><th>Baik</th><th>Tidak</th><th></th></tr></thead>
+              <tbody id="pemeriksaan-body"></tbody>
+            </table>
+          </div>
+          <button class="link-btn" id="btnAddPemeriksaan" type="button">+ Tambah item pemeriksaan</button>
+          <p class="hint">Isi nama item lalu tandai kondisinya. Baris kosong akan diabaikan saat disimpan.</p>
+
+          <h2 class="section-title">Tindakan Maintenance</h2>
+          <div class="item-table-scroll">
+            <table class="item-table">
+              <thead><tr><th>No</th><th>Uraian Tindakan</th><th>Dilakukan</th><th>Tidak</th><th>Keterangan</th><th></th></tr></thead>
+              <tbody id="maintenance-body"></tbody>
+            </table>
+          </div>
+          <button class="link-btn" id="btnAddMaintenance" type="button">+ Tambah item maintenance</button>
+
+          <h2 class="section-title">Media &amp; Sparepart</h2>
+          <div id="media-rows"></div>
+          <button class="link-btn" id="btnAddMedia" type="button">+ Tambah item media/sparepart</button>
+
+          <h2 class="section-title">Pelengkap</h2>
+          <div class="pelengkap-grid">
+            <span class="jenis-label">QR Code Label</span>
+            <select class="mini-input" id="mf-qrStatus">
+              <option value="">- status -</option>
+              <option value="ada">Ada</option>
+              <option value="tidak">Tidak</option>
+            </select>
+            <span></span>
+            <input type="text" class="mini-input" id="mf-qrKet" placeholder="Keterangan (opsional)">
+          </div>
+          <div class="pelengkap-grid">
+            <span class="jenis-label">SOP Alat</span>
+            <select class="mini-input" id="mf-sopStatus">
+              <option value="">- status -</option>
+              <option value="ada">Ada</option>
+              <option value="tidak">Tidak</option>
+            </select>
+            <select class="mini-input" id="mf-sopBerlaku">
+              <option value="">- berlaku -</option>
+              <option value="berlaku">Masih Berlaku</option>
+              <option value="tidak-berlaku">Tidak Berlaku</option>
+            </select>
+            <input type="text" class="mini-input" id="mf-sopKet" placeholder="Keterangan (opsional)">
+          </div>
+
+          <h2 class="section-title">Catatan</h2>
+          <div class="field">
+            <textarea id="mf-catatan" placeholder="Catatan tambahan (opsional)"></textarea>
+          </div>
+
+          <h2 class="section-title">Tanda Tangan</h2>
+          <div class="row">
+            <div class="field">
+              <label>Petugas</label>
+              <input type="text" id="mf-petugasNama" placeholder="Nama petugas" style="margin-bottom:8px;">
+              <div class="sig-box">
+                <canvas id="sig-petugas-m"></canvas>
+                <div class="sig-tools">
+                  <span class="sig-name-label">Tanda tangan petugas</span>
+                  <button class="link-btn" type="button" data-clear="sig-petugas-m">Hapus</button>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Pengguna Alat</label>
+              <input type="text" id="mf-penggunaNama" placeholder="Nama pengguna alat" style="margin-bottom:8px;">
+              <div class="sig-box">
+                <canvas id="sig-pengguna-m"></canvas>
+                <div class="sig-tools">
+                  <span class="sig-name-label">Tanda tangan pengguna alat</span>
+                  <button class="link-btn" type="button" data-clear="sig-pengguna-m">Hapus</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="btnSubmitM">Simpan & Buat PDF</button>
+            <button class="btn btn-ghost" id="btnResetM" type="button">Bersihkan Formulir</button>
+          </div>
+          <div class="status-msg" id="statusMsgM"></div>
+        </div><!-- /fields-maintenance -->
+
       </div>
     </div>
   </div>
 
   <!-- RIWAYAT TAB -->
   <div id="tab-riwayat" style="display:none;">
-    <div class="toolbar">
-      <span class="count" id="ledgerCount">Memuat data…</span>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost" id="btnExportCsv" type="button">Ekspor CSV</button>
-        <button class="btn btn-ghost" id="btnRefresh" type="button">Muat ulang</button>
+    <div id="riwayat-serah">
+      <div class="toolbar">
+        <span class="count" id="ledgerCount">Memuat data…</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" id="btnExportCsv" type="button">Ekspor CSV</button>
+          <button class="btn btn-ghost" id="btnRefresh" type="button">Muat ulang</button>
+        </div>
       </div>
+      <div id="ledgerWrap" class="ledger-scroll"><div class="empty-state">Memuat riwayat…</div></div>
+      <p class="shared-note">Data pada riwayat ini disimpan langsung ke Google Sheets kamu (sheet "Serah Terima") — bisa dibuka & diedit juga langsung dari Sheets kapan saja.</p>
     </div>
-    <div id="ledgerWrap" class="ledger-scroll"><div class="empty-state">Memuat riwayat…</div></div>
-    <p class="shared-note">Data pada riwayat ini disimpan langsung ke Google Sheets kamu — bisa dibuka & diedit juga langsung dari Sheets kapan saja.</p>
+
+    <div id="riwayat-maintenance" style="display:none;">
+      <div class="toolbar">
+        <span class="count" id="ledgerCountM">Memuat data…</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" id="btnExportCsvM" type="button">Ekspor CSV</button>
+          <button class="btn btn-ghost" id="btnRefreshM" type="button">Muat ulang</button>
+        </div>
+      </div>
+      <div id="ledgerWrapM" class="ledger-scroll"><div class="empty-state">Memuat riwayat…</div></div>
+      <p class="shared-note">Data pada riwayat ini disimpan langsung ke Google Sheets kamu (sheet "Maintenance") — bisa dibuka & diedit juga langsung dari Sheets kapan saja.</p>
+    </div>
   </div>
 
 </div>
@@ -388,6 +619,27 @@
     if(b) b.src = LOGO_RMN_DATA;
   });
 
+  /* ---------- mode switch (Serah Terima <-> Pemeriksaan & Maintenance) ---------- */
+  let currentMode = 'serah';
+
+  function loadCurrentRiwayat(){
+    if(currentMode === 'serah') loadLedger(); else loadMaintenanceLedger();
+  }
+
+  document.querySelectorAll('.mode-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMode = btn.dataset.mode;
+      document.getElementById('fields-serah').style.display = currentMode==='serah' ? '' : 'none';
+      document.getElementById('fields-maintenance').style.display = currentMode==='maintenance' ? '' : 'none';
+      document.getElementById('riwayat-serah').style.display = currentMode==='serah' ? '' : 'none';
+      document.getElementById('riwayat-maintenance').style.display = currentMode==='maintenance' ? '' : 'none';
+      const riwayatShown = document.getElementById('tab-riwayat').style.display !== 'none';
+      if(riwayatShown) loadCurrentRiwayat();
+    });
+  });
+
   /* ---------- tabs ---------- */
   document.querySelectorAll('.tab-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -396,7 +648,7 @@
       const tab = btn.dataset.tab;
       document.getElementById('tab-form').style.display = tab==='form' ? '' : 'none';
       document.getElementById('tab-riwayat').style.display = tab==='riwayat' ? '' : 'none';
-      if(tab==='riwayat') loadLedger();
+      if(tab==='riwayat') loadCurrentRiwayat();
     });
   });
 
@@ -561,8 +813,8 @@
   refreshSerial();
 
   /* ---------- status message ---------- */
-  function showStatus(msg, ok){
-    const el = document.getElementById('statusMsg');
+  function showStatus(msg, ok, targetId){
+    const el = document.getElementById(targetId || 'statusMsg');
     el.textContent = msg;
     el.className = 'status-msg ' + (ok ? 'ok':'err');
   }
@@ -863,6 +1115,492 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = 'riwayat-tanda-terima.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+
+  /* =====================================================================
+     MODE: PEMERIKSAAN & MAINTENANCE ALAT
+     ===================================================================== */
+
+  /* ---------- render editable item rows (dinamis, tambah/hapus baris) ---------- */
+  function escAttr(v){ return v ? String(v).replace(/"/g,'&quot;') : ''; }
+
+  function renumberRows(tbodyId){
+    document.querySelectorAll('#'+tbodyId+' tr').forEach((tr,i)=>{
+      const noCell = tr.querySelector('.item-no');
+      if(noCell) noCell.textContent = i+1;
+    });
+  }
+
+  let pRowSeq = 0;
+  function addPemeriksaanRow(itemVal, kondisiVal){
+    const tbody = document.getElementById('pemeriksaan-body');
+    pRowSeq++;
+    const seq = pRowSeq;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="item-no"></td>'+
+      '<td><input type="text" class="mini-input p-item" placeholder="Nama item pemeriksaan" value="'+escAttr(itemVal)+'"></td>'+
+      '<td class="item-radio"><input type="radio" name="p-kondisi-'+seq+'" class="p-kondisi" value="baik" '+(kondisiVal==='baik'?'checked':'')+'></td>'+
+      '<td class="item-radio"><input type="radio" name="p-kondisi-'+seq+'" class="p-kondisi" value="tidak" '+(kondisiVal==='tidak'?'checked':'')+'></td>'+
+      '<td class="item-radio aksi-col"><button class="del-row-mini" type="button" title="Hapus baris">&times;</button></td>';
+    tr.querySelector('.del-row-mini').addEventListener('click', ()=>{ tr.remove(); renumberRows('pemeriksaan-body'); });
+    tbody.appendChild(tr);
+    renumberRows('pemeriksaan-body');
+  }
+  document.getElementById('btnAddPemeriksaan').addEventListener('click', ()=> addPemeriksaanRow());
+
+  let mRowSeq = 0;
+  function addMaintenanceRow(itemVal, dilakukanVal, ketVal){
+    const tbody = document.getElementById('maintenance-body');
+    mRowSeq++;
+    const seq = mRowSeq;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="item-no"></td>'+
+      '<td><input type="text" class="mini-input m-item" placeholder="Uraian tindakan maintenance" value="'+escAttr(itemVal)+'"></td>'+
+      '<td class="item-radio"><input type="radio" name="m-dilakukan-'+seq+'" class="m-dilakukan" value="dilakukan" '+(dilakukanVal==='dilakukan'?'checked':'')+'></td>'+
+      '<td class="item-radio"><input type="radio" name="m-dilakukan-'+seq+'" class="m-dilakukan" value="tidak" '+(dilakukanVal==='tidak'?'checked':'')+'></td>'+
+      '<td><input type="text" class="mini-input m-ket" placeholder="Keterangan" value="'+escAttr(ketVal)+'"></td>'+
+      '<td class="item-radio aksi-col"><button class="del-row-mini" type="button" title="Hapus baris">&times;</button></td>';
+    tr.querySelector('.del-row-mini').addEventListener('click', ()=>{ tr.remove(); renumberRows('maintenance-body'); });
+    tbody.appendChild(tr);
+    renumberRows('maintenance-body');
+  }
+  document.getElementById('btnAddMaintenance').addEventListener('click', ()=> addMaintenanceRow());
+
+  function addMediaRow(item, ket){
+    const wrap = document.getElementById('media-rows');
+    const row = document.createElement('div');
+    row.className = 'media-row';
+    row.innerHTML =
+      '<input type="text" class="mini-input media-item" placeholder="Nama media/sparepart" value="'+escAttr(item)+'">'+
+      '<input type="text" class="mini-input media-ket" placeholder="Keterangan" value="'+escAttr(ket)+'">'+
+      '<button class="del-row" type="button">Hapus</button>';
+    row.querySelector('.del-row').addEventListener('click', ()=>{ row.remove(); });
+    wrap.appendChild(row);
+  }
+  document.getElementById('btnAddMedia').addEventListener('click', ()=> addMediaRow());
+
+  function resetItemTables(){
+    document.getElementById('pemeriksaan-body').innerHTML = '';
+    document.getElementById('maintenance-body').innerHTML = '';
+    document.getElementById('media-rows').innerHTML = '';
+    for(let i=0;i<5;i++) addPemeriksaanRow();
+    for(let i=0;i<3;i++) addMaintenanceRow();
+    addMediaRow();
+    addMediaRow();
+  }
+
+  resetItemTables();
+  document.getElementById('mf-tanggal').valueAsDate = new Date();
+
+  /* ---------- signature pads (maintenance) ---------- */
+  const sigPetugasM = document.getElementById('sig-petugas-m');
+  const sigPenggunaM = document.getElementById('sig-pengguna-m');
+  setupSig(sigPetugasM);
+  setupSig(sigPenggunaM);
+
+  /* ---------- collect form data ---------- */
+  function getMaintenanceFormData(){
+    const pemeriksaan = [];
+    document.querySelectorAll('#pemeriksaan-body tr').forEach((tr,i)=>{
+      const item = tr.querySelector('.p-item').value.trim();
+      const checked = tr.querySelector('.p-kondisi:checked');
+      if(item || checked) pemeriksaan.push({ no:i+1, item, kondisi: checked ? checked.value : '' });
+    });
+    const maintenanceItems = [];
+    document.querySelectorAll('#maintenance-body tr').forEach((tr,i)=>{
+      const item = tr.querySelector('.m-item').value.trim();
+      const checked = tr.querySelector('.m-dilakukan:checked');
+      const ket = tr.querySelector('.m-ket').value.trim();
+      if(item || checked || ket) maintenanceItems.push({ no:i+1, item, dilakukan: checked ? checked.value : '', keterangan: ket });
+    });
+    const media = [];
+    document.querySelectorAll('#media-rows .media-row').forEach(row=>{
+      const item = row.querySelector('.media-item').value.trim();
+      const ket = row.querySelector('.media-ket').value.trim();
+      if(item || ket) media.push({ item, keterangan: ket });
+    });
+    return {
+      namaAlat: document.getElementById('mf-namaAlat').value.trim(),
+      merkType: document.getElementById('mf-merkType').value.trim(),
+      lokasi: document.getElementById('mf-lokasi').value.trim(),
+      noSeri: document.getElementById('mf-noSeri').value.trim(),
+      noInventaris: document.getElementById('mf-noInventaris').value.trim(),
+      tanggal: document.getElementById('mf-tanggal').value,
+      namaRuang: document.getElementById('mf-namaRuang').value.trim(),
+      temperature: document.getElementById('mf-temperature').value.trim(),
+      kelembaban: document.getElementById('mf-kelembaban').value.trim(),
+      powerPhase: document.getElementById('mf-powerPhase').value.trim(),
+      tegangan: document.getElementById('mf-tegangan').value.trim(),
+      kendala: document.getElementById('mf-kendala').value.trim(),
+      pemeriksaan: JSON.stringify(pemeriksaan),
+      maintenanceItems: JSON.stringify(maintenanceItems),
+      media: JSON.stringify(media),
+      qrStatus: document.getElementById('mf-qrStatus').value,
+      qrKet: document.getElementById('mf-qrKet').value.trim(),
+      sopStatus: document.getElementById('mf-sopStatus').value,
+      sopBerlaku: document.getElementById('mf-sopBerlaku').value,
+      sopKet: document.getElementById('mf-sopKet').value.trim(),
+      catatan: document.getElementById('mf-catatan').value.trim(),
+      petugasNama: document.getElementById('mf-petugasNama').value.trim(),
+      penggunaNama: document.getElementById('mf-penggunaNama').value.trim(),
+      sigPetugas: sigDataUrl(sigPetugasM),
+      sigPengguna: sigDataUrl(sigPenggunaM)
+    };
+  }
+
+  function parseMaybeJson(v){
+    if(Array.isArray(v)) return v;
+    try{ return JSON.parse(v || '[]'); }catch(e){ return []; }
+  }
+
+  function validateMaintenanceForm(d){
+    if(!d.namaAlat) return 'Kolom "Nama Alat" wajib diisi.';
+    if(!d.lokasi) return 'Kolom "Lokasi" wajib diisi.';
+    if(!d.tanggal) return 'Tanggal wajib diisi.';
+    return null;
+  }
+
+  /* ---------- PDF generation (maintenance) ---------- */
+  function drawWatermarkM(doc, pageW){
+    try{
+      doc.setGState(new doc.GState({opacity:0.07}));
+      const wmW = 110, wmH = wmW * (414/603);
+      doc.addImage(LOGO_RMN_DATA, 'PNG', (pageW-wmW)/2, 130, wmW, wmH);
+      doc.setGState(new doc.GState({opacity:1}));
+    }catch(e){ /* optional */ }
+  }
+
+  function drawKopM(doc, marginX, pageW){
+    let y = 12;
+    const logoW = 40, logoH = logoW * (250/750);
+    try{ doc.addImage(LOGO_RUANGLAB_DATA, 'PNG', marginX, y, logoW, logoH); }catch(e){}
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(90,90,90);
+    doc.text('Maguwoharjo, Sleman, Yogyakarta', marginX, y+logoH+3.5);
+    doc.text('Phone. 0857-4366-1020 | https://ruanglab.com', marginX, y+logoH+7);
+    const rmnW = 15, rmnH = rmnW * (414/603);
+    try{ doc.addImage(LOGO_RMN_DATA, 'PNG', pageW-marginX-rmnW, y, rmnW, rmnH); }catch(e){}
+    return y + logoH + 11;
+  }
+
+  function ensureSpaceM(doc, y, needed, pageW){
+    if(y + needed > 283){
+      doc.addPage();
+      drawWatermarkM(doc, pageW);
+      return 15;
+    }
+    return y;
+  }
+
+  function sectionHeaderM(doc, text, x, y, w){
+    doc.setFillColor(11,79,113);
+    doc.rect(x, y, w, 6, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
+    doc.text(text, x+2, y+4.2);
+    doc.setTextColor(20,20,20);
+    return y+6;
+  }
+
+  function drawTableM(doc, x, yStart, colWidths, header, rows, opts){
+    opts = opts || {};
+    let y = yStart;
+    const pageW = 210;
+    const rowH = opts.rowH || 6;
+    const totalW = colWidths.reduce((a,b)=>a+b,0);
+    doc.setDrawColor(180,175,160); doc.setLineWidth(.2);
+    doc.setFillColor(240,238,230);
+    doc.rect(x, y, totalW, rowH, 'F');
+    doc.rect(x, y, totalW, rowH);
+    let cx = x;
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.3); doc.setTextColor(70,70,70);
+    header.forEach((h,i)=>{
+      if(i>0) doc.line(cx, y, cx, y+rowH);
+      doc.text(String(h), cx+1.5, y+rowH/2+1.1, {maxWidth: colWidths[i]-3});
+      cx += colWidths[i];
+    });
+    y += rowH;
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.3); doc.setTextColor(20,20,20);
+    rows.forEach(r=>{
+      y = ensureSpaceM(doc, y, rowH, pageW);
+      doc.rect(x, y, totalW, rowH);
+      let cx2 = x;
+      r.forEach((val,i)=>{
+        if(i>0) doc.line(cx2, y, cx2, y+rowH);
+        const align = (opts.centerCols && opts.centerCols.indexOf(i)!==-1) ? 'center' : 'left';
+        const tx = align==='center' ? cx2+colWidths[i]/2 : cx2+1.5;
+        doc.text(String(val==null?'':val), tx, y+rowH/2+1.1, {align:align, maxWidth: colWidths[i]-3});
+        cx2 += colWidths[i];
+      });
+      y += rowH;
+    });
+    return y;
+  }
+
+  function buildMaintenancePdf(d){
+    const doc = new jsPDF({unit:'mm', format:'a4'});
+    const pageW = 210, marginX = 15, contentW = pageW - marginX*2;
+    drawWatermarkM(doc, pageW);
+    let y = drawKopM(doc, marginX, pageW);
+
+    doc.setTextColor(20,20,20);
+    doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text('FORMULIR PEMERIKSAAN DAN MAINTENANCE ALAT', pageW/2, y, {align:'center'});
+    y += 7;
+
+    doc.setDrawColor(180,175,160); doc.setLineWidth(.2);
+
+    function infoRow(l1, v1, l2, v2){
+      const rowH = 7.5, half = contentW/2;
+      doc.rect(marginX, y, contentW, rowH);
+      doc.line(marginX+half, y, marginX+half, y+rowH);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,90,90);
+      doc.text(l1, marginX+2, y+rowH/2+1);
+      doc.text(l2, marginX+half+2, y+rowH/2+1);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9.3); doc.setTextColor(20,20,20);
+      doc.text(v1||'-', marginX+34, y+rowH/2+1, {maxWidth: half-36});
+      doc.text(v2||'-', marginX+half+30, y+rowH/2+1, {maxWidth: half-32});
+      y += rowH;
+    }
+    infoRow('NAMA ALAT', d.namaAlat, 'MERK/TYPE', d.merkType);
+    infoRow('LOKASI', d.lokasi, 'NO. SERI', d.noSeri);
+    const tglFmt = d.tanggal ? d.tanggal.split('-').reverse().join('-') : '-';
+    infoRow('NO. INVENTARIS', d.noInventaris, 'TANGGAL', tglFmt);
+
+    y += 5;
+    y = sectionHeaderM(doc, 'KONDISI LINGKUNGAN', marginX, y, contentW);
+    (function(){
+      const cols = [
+        {l:'Nama Ruang', v:d.namaRuang},
+        {l:'Temperature (°C)', v:d.temperature},
+        {l:'Kelembaban (%RH)', v:d.kelembaban},
+        {l:'Power Phase', v:d.powerPhase},
+        {l:'Tegangan (V)', v:d.tegangan}
+      ];
+      const cw = contentW/cols.length, rowH = 12;
+      doc.rect(marginX, y, contentW, rowH);
+      let cx = marginX;
+      cols.forEach((c,i)=>{
+        if(i>0) doc.line(cx, y, cx, y+rowH);
+        doc.setFont('helvetica','italic'); doc.setFontSize(7); doc.setTextColor(90,90,90);
+        doc.text(c.l, cx+2, y+4.5, {maxWidth: cw-4});
+        doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(20,20,20);
+        doc.text(c.v || '-', cx+2, y+9.5, {maxWidth: cw-4});
+        cx += cw;
+      });
+      y += rowH;
+    })();
+
+    y += 5;
+    y = sectionHeaderM(doc, 'KENDALA', marginX, y, contentW);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(20,20,20);
+    const kendalaLines = doc.splitTextToSize(d.kendala || '-', contentW-4);
+    const kendalaH = Math.max(10, 4 + kendalaLines.length*4.6);
+    doc.rect(marginX, y, contentW, kendalaH);
+    doc.text(kendalaLines, marginX+2, y+5.5);
+    y += kendalaH;
+
+    y += 5;
+    y = ensureSpaceM(doc, y, 20, pageW);
+    y = sectionHeaderM(doc, 'TINDAKAN PEMERIKSAAN', marginX, y, contentW);
+    const pemeriksaan = parseMaybeJson(d.pemeriksaan).filter(p=>p.item || p.kondisi);
+    const pRows = pemeriksaan.length
+      ? pemeriksaan.map((it,i)=>[i+1, it.item || '-', it.kondisi==='baik' ? 'V' : '', it.kondisi==='tidak' ? 'V' : ''])
+      : [['-', 'Tidak ada item', '', '']];
+    y = drawTableM(doc, marginX, y, [10, contentW-10-25-25, 25, 25], ['No','Item','Baik','Tidak'], pRows, {centerCols:[0,2,3]});
+
+    y += 5;
+    y = ensureSpaceM(doc, y, 20, pageW);
+    y = sectionHeaderM(doc, 'TINDAKAN MAINTENANCE', marginX, y, contentW);
+    const maintItems = parseMaybeJson(d.maintenanceItems).filter(p=>p.item || p.dilakukan || p.keterangan);
+    const mRows = maintItems.length
+      ? maintItems.map((it,i)=>[i+1, it.item || '-', it.dilakukan==='dilakukan' ? 'V' : '', it.dilakukan==='tidak' ? 'V' : '', it.keterangan || '-'])
+      : [['-', 'Tidak ada item', '', '', '-']];
+    const mColW = [10, contentW-10-22-22-55, 22, 22, 55];
+    y = drawTableM(doc, marginX, y, mColW, ['No','Uraian Tindakan','Ya','Tidak','Keterangan'], mRows, {centerCols:[0,2,3], rowH:7});
+
+    y += 5;
+    y = ensureSpaceM(doc, y, 20, pageW);
+    y = sectionHeaderM(doc, 'MEDIA & SPAREPART', marginX, y, contentW);
+    const media = parseMaybeJson(d.media);
+    const medRows = media.length ? media.map((m,i)=>[i+1, m.item||'-', m.keterangan||'-']) : [['-','Tidak ada item','-']];
+    y = drawTableM(doc, marginX, y, [10, contentW-10-70, 70], ['No','Item','Keterangan'], medRows, {centerCols:[0]});
+
+    y += 5;
+    y = ensureSpaceM(doc, y, 20, pageW);
+    y = sectionHeaderM(doc, 'PELENGKAP', marginX, y, contentW);
+    const qrLabel = d.qrStatus==='ada' ? 'Ada' : (d.qrStatus==='tidak' ? 'Tidak' : '-');
+    const sopStatusLabel = d.sopStatus==='ada' ? 'Ada' : (d.sopStatus==='tidak' ? 'Tidak' : '-');
+    const sopBerlakuLabel = d.sopBerlaku==='berlaku' ? 'Masih Berlaku' : (d.sopBerlaku==='tidak-berlaku' ? 'Tidak Berlaku' : '-');
+    const pelRows = [
+      ['QR Code Label', qrLabel, '-', d.qrKet || '-'],
+      ['SOP Alat', sopStatusLabel, sopBerlakuLabel, d.sopKet || '-']
+    ];
+    y = drawTableM(doc, marginX, y, [45, 30, 40, contentW-45-30-40], ['Jenis','Status','Keberlakuan','Keterangan'], pelRows);
+
+    y += 5;
+    y = ensureSpaceM(doc, y, 18, pageW);
+    y = sectionHeaderM(doc, 'CATATAN', marginX, y, contentW);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(20,20,20);
+    const catatanLines = doc.splitTextToSize(d.catatan || '-', contentW-4);
+    const catatanH = Math.max(10, 4 + catatanLines.length*4.6);
+    doc.rect(marginX, y, contentW, catatanH);
+    doc.text(catatanLines, marginX+2, y+5.5);
+    y += catatanH;
+
+    y += 10;
+    y = ensureSpaceM(doc, y, 34, pageW);
+    const sigColW = contentW/2;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(20,20,20);
+    doc.text('Petugas,', marginX+4, y);
+    doc.text('Pengguna Alat,', marginX+sigColW+4, y);
+    const sigImgW = 42, sigImgH = 17;
+    if(d.sigPetugas){ try{ doc.addImage(d.sigPetugas,'PNG', marginX+2, y+3, sigImgW, sigImgH); }catch(e){} }
+    if(d.sigPengguna){ try{ doc.addImage(d.sigPengguna,'PNG', marginX+sigColW+2, y+3, sigImgW, sigImgH); }catch(e){} }
+    y += sigImgH + 12;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10);
+    doc.text('( '+(d.petugasNama||'.......................')+' )', marginX+4, y);
+    doc.text('( '+(d.penggunaNama||'.......................')+' )', marginX+sigColW+4, y);
+
+    return doc;
+  }
+
+  /* ---------- submit / reset (maintenance) ---------- */
+  let lastBlobUrlM = null;
+
+  document.getElementById('btnSubmitM').addEventListener('click', async ()=>{
+    const d = getMaintenanceFormData();
+    const err = validateMaintenanceForm(d);
+    if(err){ showStatus(err, false, 'statusMsgM'); return; }
+    const btn = document.getElementById('btnSubmitM');
+    btn.disabled = true; btn.textContent = 'Menyimpan…';
+    try{
+      const id = 'maint_'+Date.now();
+      const record = Object.assign({action:'create', sheet:'Maintenance', id}, d);
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify(record)
+      });
+      const resJson = await res.json();
+      if(resJson.error) throw new Error(resJson.error);
+
+      const doc = buildMaintenancePdf(d);
+      const blob = doc.output('blob');
+      if(lastBlobUrlM) URL.revokeObjectURL(lastBlobUrlM);
+      lastBlobUrlM = URL.createObjectURL(blob);
+
+      showStatus('Tersimpan! Data masuk ke Riwayat Pemeriksaan & Maintenance.', true, 'statusMsgM');
+      document.getElementById('modalBg').classList.add('show');
+      document.getElementById('modalDownload').onclick = ()=>{
+        const a = document.createElement('a');
+        a.href = lastBlobUrlM;
+        a.download = 'Pemeriksaan-'+(d.namaAlat||'Alat').replace(/[^\w\-]+/g,'-')+'-'+(d.tanggal||'').replace(/\//g,'-')+'.pdf';
+        a.click();
+      };
+    }catch(e){
+      console.error(e);
+      showStatus('Gagal menyimpan data: '+e.message, false, 'statusMsgM');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Simpan & Buat PDF';
+    }
+  });
+
+  document.getElementById('btnResetM').addEventListener('click', ()=>{
+    document.querySelectorAll('#fields-maintenance input[type=text], #fields-maintenance textarea').forEach(el=>{
+      if(!el.closest('#pemeriksaan-body') && !el.closest('#maintenance-body') && !el.closest('#media-rows')) el.value='';
+    });
+    document.querySelectorAll('#fields-maintenance select').forEach(el=>{ el.selectedIndex=0; });
+    [sigPetugasM, sigPenggunaM].forEach(c=>c.getContext('2d').clearRect(0,0,c.width,c.height));
+    resetItemTables();
+    document.getElementById('statusMsgM').className = 'status-msg';
+    document.getElementById('mf-tanggal').valueAsDate = new Date();
+  });
+
+  /* ---------- ledger / riwayat (maintenance) ---------- */
+  let cachedRecordsM = [];
+
+  async function loadMaintenanceLedger(){
+    const wrap = document.getElementById('ledgerWrapM');
+    const countEl = document.getElementById('ledgerCountM');
+    wrap.innerHTML = '<div class="empty-state">Memuat riwayat…</div>';
+    try{
+      const res = await fetch(SCRIPT_URL+'?action=list&sheet=Maintenance');
+      const json = await res.json();
+      if(json.error) throw new Error(json.error);
+      const records = json.records || [];
+      records.sort((a,b)=> (b.createdAt||'').localeCompare(a.createdAt||''));
+      cachedRecordsM = records;
+      countEl.textContent = records.length + ' entri tersimpan';
+      if(records.length === 0){
+        wrap.innerHTML = '<div class="empty-state">Belum ada data. Isi formulir Pemeriksaan & Maintenance untuk menambah entri pertama.</div>';
+        return;
+      }
+      let html = '<table class="ledger"><thead><tr>'+
+        '<th>Tanggal</th><th>Nama Alat</th><th>Lokasi</th><th>No. Inventaris</th>'+
+        '<th>Petugas</th><th>Pengguna Alat</th><th>Aksi</th>'+
+        '</tr></thead><tbody>';
+      records.forEach(r=>{
+        html += '<tr>'+
+          '<td>'+(r.tanggal||'-')+'</td>'+
+          '<td>'+(r.namaAlat||'-')+'</td>'+
+          '<td>'+(r.lokasi||'-')+'</td>'+
+          '<td class="no-mono">'+(r.noInventaris||'-')+'</td>'+
+          '<td>'+(r.petugasNama||'-')+'</td>'+
+          '<td>'+(r.penggunaNama||'-')+'</td>'+
+          '<td class="row-actions">'+
+            '<button data-id="'+r.id+'" class="dl">Unduh PDF</button>'+
+            '<button data-id="'+r.id+'" class="del">Hapus</button>'+
+          '</td>'+
+        '</tr>';
+      });
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+
+      wrap.querySelectorAll('button.dl').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const r = cachedRecordsM.find(x=>x.id===btn.dataset.id);
+          if(!r) return;
+          const doc = buildMaintenancePdf(r);
+          doc.save('Pemeriksaan-'+(r.namaAlat||r.id).replace(/[^\w\-]+/g,'-')+'.pdf');
+        });
+      });
+      wrap.querySelectorAll('button.del').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          if(!confirm('Hapus entri ini dari riwayat?')) return;
+          try{
+            await fetch(SCRIPT_URL, {
+              method:'POST',
+              headers:{'Content-Type':'text/plain;charset=utf-8'},
+              body: JSON.stringify({action:'delete', sheet:'Maintenance', id: btn.dataset.id})
+            });
+            loadMaintenanceLedger();
+          }catch(e){ alert('Gagal menghapus: '+e.message); }
+        });
+      });
+    }catch(e){
+      wrap.innerHTML = '<div class="empty-state">Gagal memuat data: '+e.message+'</div>';
+      countEl.textContent = '';
+    }
+  }
+
+  document.getElementById('btnRefreshM').addEventListener('click', loadMaintenanceLedger);
+
+  document.getElementById('btnExportCsvM').addEventListener('click', ()=>{
+    if(cachedRecordsM.length === 0){ alert('Belum ada data untuk diekspor.'); return; }
+    const cols = ['tanggal','namaAlat','merkType','lokasi','noSeri','noInventaris','namaRuang','temperature','kelembaban','powerPhase','tegangan','kendala','petugasNama','penggunaNama','createdAt'];
+    const header = ['Tanggal','Nama Alat','Merk/Type','Lokasi','No Seri','No Inventaris','Nama Ruang','Temperature','Kelembaban','Power Phase','Tegangan','Kendala','Petugas','Pengguna Alat','Dibuat Pada'];
+    let csv = header.map(csvEscape).join(',') + '\n';
+    cachedRecordsM.forEach(r=>{
+      csv += cols.map(c=>csvEscape(r[c])).join(',') + '\n';
+    });
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'riwayat-pemeriksaan-maintenance.csv';
     a.click();
     URL.revokeObjectURL(url);
   });
