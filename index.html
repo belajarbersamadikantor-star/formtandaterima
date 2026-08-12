@@ -1450,6 +1450,15 @@
   }
 
   /* ---------- PDF generation (maintenance) ---------- */
+  // Data dari riwayat (hasil baca Google Sheets) bisa datang sebagai Number,
+  // bukan String (mis. No. Seri / No. Inventaris / Temperature yang berupa
+  // angka murni otomatis dikonversi Sheets jadi tipe Number saat disimpan).
+  // doc.text() milik jsPDF akan error kalau diberi Number langsung, dan error
+  // itu tidak tertangkap di tombol "Unduh PDF" -> makanya klik terasa "tidak
+  // merespons" sama sekali. safeTxt() memastikan semua nilai jadi string dulu.
+  function safeTxt(v){
+    return (v===undefined || v===null || v==='') ? '-' : String(v);
+  }
   function drawWatermarkM(doc, pageW){
     try{
       doc.setGState(new doc.GState({opacity:0.07}));
@@ -1493,30 +1502,36 @@
     opts = opts || {};
     let y = yStart;
     const pageW = 210;
-    const rowH = opts.rowH || 6;
+    const minRowH = opts.rowH || 6;
+    const lineH = opts.lineH || 3.3; // tinggi per baris teks saat isi sel dibungkus (mm)
     const totalW = colWidths.reduce((a,b)=>a+b,0);
     doc.setDrawColor(180,175,160); doc.setLineWidth(.2);
     doc.setFillColor(240,238,230);
-    doc.rect(x, y, totalW, rowH, 'F');
-    doc.rect(x, y, totalW, rowH);
+    doc.rect(x, y, totalW, minRowH, 'F');
+    doc.rect(x, y, totalW, minRowH);
     let cx = x;
     doc.setFont('helvetica','bold'); doc.setFontSize(7.3); doc.setTextColor(70,70,70);
     header.forEach((h,i)=>{
-      if(i>0) doc.line(cx, y, cx, y+rowH);
-      doc.text(String(h), cx+1.5, y+rowH/2+1.1, {maxWidth: colWidths[i]-3});
+      if(i>0) doc.line(cx, y, cx, y+minRowH);
+      doc.text(String(h), cx+1.5, y+minRowH/2+1.1, {maxWidth: colWidths[i]-3});
       cx += colWidths[i];
     });
-    y += rowH;
+    y += minRowH;
     doc.setFont('helvetica','normal'); doc.setFontSize(7.3); doc.setTextColor(20,20,20);
     rows.forEach(r=>{
+      // bungkus dulu tiap sel supaya tinggi baris bisa menyesuaikan isi terpanjang
+      const wrapped = r.map((val,i)=> doc.splitTextToSize(String(val==null?'':val), colWidths[i]-3));
+      const maxLines = Math.max(1, ...wrapped.map(w=>w.length));
+      const rowH = Math.max(minRowH, maxLines*lineH + 2.6);
+
       y = ensureSpaceM(doc, y, rowH, pageW);
       doc.rect(x, y, totalW, rowH);
       let cx2 = x;
-      r.forEach((val,i)=>{
+      wrapped.forEach((lines,i)=>{
         if(i>0) doc.line(cx2, y, cx2, y+rowH);
         const align = (opts.centerCols && opts.centerCols.indexOf(i)!==-1) ? 'center' : 'left';
         const tx = align==='center' ? cx2+colWidths[i]/2 : cx2+1.5;
-        doc.text(String(val==null?'':val), tx, y+rowH/2+1.1, {align:align, maxWidth: colWidths[i]-3});
+        doc.text(lines, tx, y+3.0, {align:align, maxWidth: colWidths[i]-3});
         cx2 += colWidths[i];
       });
       y += rowH;
@@ -1549,8 +1564,8 @@
       doc.text(l1, marginX+2, y+rowH/2+1);
       doc.text(l2, marginX+half+2, y+rowH/2+1);
       doc.setFont('helvetica','normal'); doc.setFontSize(9.3); doc.setTextColor(20,20,20);
-      doc.text(v1||'-', marginX+34, y+rowH/2+1, {maxWidth: half-36});
-      doc.text(v2||'-', marginX+half+30, y+rowH/2+1, {maxWidth: half-32});
+      doc.text(safeTxt(v1), marginX+34, y+rowH/2+1, {maxWidth: half-36});
+      doc.text(safeTxt(v2), marginX+half+30, y+rowH/2+1, {maxWidth: half-32});
       y += rowH;
     }
     infoRow('NAMA ALAT', d.namaAlat, 'MERK/TYPE', d.merkType);
@@ -1576,7 +1591,7 @@
         doc.setFont('helvetica','italic'); doc.setFontSize(7); doc.setTextColor(90,90,90);
         doc.text(c.l, cx+2, y+4.5, {maxWidth: cw-4});
         doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(20,20,20);
-        doc.text(c.v || '-', cx+2, y+9.5, {maxWidth: cw-4});
+        doc.text(safeTxt(c.v), cx+2, y+9.5, {maxWidth: cw-4});
         cx += cw;
       });
       y += rowH;
@@ -1585,7 +1600,7 @@
     y += 5;
     y = sectionHeaderM(doc, 'KENDALA', marginX, y, contentW);
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(20,20,20);
-    const kendalaLines = doc.splitTextToSize(d.kendala || '-', contentW-4);
+    const kendalaLines = doc.splitTextToSize(safeTxt(d.kendala), contentW-4);
     const kendalaH = Math.max(10, 4 + kendalaLines.length*4.6);
     doc.rect(marginX, y, contentW, kendalaH);
     doc.text(kendalaLines, marginX+2, y+5.5);
@@ -1634,7 +1649,7 @@
     y = ensureSpaceM(doc, y, 18, pageW);
     y = sectionHeaderM(doc, 'CATATAN', marginX, y, contentW);
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(20,20,20);
-    const catatanLines = doc.splitTextToSize(d.catatan || '-', contentW-4);
+    const catatanLines = doc.splitTextToSize(safeTxt(d.catatan), contentW-4);
     const catatanH = Math.max(10, 4 + catatanLines.length*4.6);
     doc.rect(marginX, y, contentW, catatanH);
     doc.text(catatanLines, marginX+2, y+5.5);
