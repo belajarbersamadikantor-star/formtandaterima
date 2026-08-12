@@ -1503,35 +1503,45 @@
     let y = yStart;
     const pageW = 210;
     const minRowH = opts.rowH || 6;
-    const lineH = opts.lineH || 3.3; // tinggi per baris teks saat isi sel dibungkus (mm)
+    const fontSize = 7.3;
+    const LHF = 1.15; // lineHeightFactor -- dipaksa eksplisit di doc.text() di bawah,
+                       // supaya jarak antar baris yang DIRENDER pasti sama dengan
+                       // jarak yang dipakai untuk MENGHITUNG tinggi kotak (lineH).
+                       // Sebelumnya jarak dibiarkan default jsPDF (tidak pasti nilainya)
+                       // sementara tinggi kotak dihitung pakai tebakan -> beda sedikit
+                       // -> baris terakhir bisa tembus keluar garis bawah.
+    const lineH = fontSize * LHF / doc.internal.scaleFactor; // mm per baris, sesuai LHF di atas
     const totalW = colWidths.reduce((a,b)=>a+b,0);
     doc.setDrawColor(180,175,160); doc.setLineWidth(.2);
     doc.setFillColor(240,238,230);
     doc.rect(x, y, totalW, minRowH, 'F');
     doc.rect(x, y, totalW, minRowH);
     let cx = x;
-    doc.setFont('helvetica','bold'); doc.setFontSize(7.3); doc.setTextColor(70,70,70);
+    doc.setFont('helvetica','bold'); doc.setFontSize(fontSize); doc.setTextColor(70,70,70);
     header.forEach((h,i)=>{
       if(i>0) doc.line(cx, y, cx, y+minRowH);
       doc.text(String(h), cx+1.5, y+minRowH/2+1.1, {maxWidth: colWidths[i]-3});
       cx += colWidths[i];
     });
     y += minRowH;
-    doc.setFont('helvetica','normal'); doc.setFontSize(7.3); doc.setTextColor(20,20,20);
+    doc.setFont('helvetica','normal'); doc.setFontSize(fontSize); doc.setTextColor(20,20,20);
     rows.forEach(r=>{
       // bungkus dulu tiap sel supaya tinggi baris bisa menyesuaikan isi terpanjang
       const wrapped = r.map((val,i)=> doc.splitTextToSize(String(val==null?'':val), colWidths[i]-3));
       const maxLines = Math.max(1, ...wrapped.map(w=>w.length));
-      const rowH = Math.max(minRowH, maxLines*lineH + 2.6);
+      // padding atas (jarak dari garis atas ke baseline baris pertama) + padding bawah
+      // (ruang untuk descender huruf seperti g/y di baris terakhir), masing2 ~1 baris
+      const rowH = Math.max(minRowH, maxLines*lineH + lineH*1.15);
 
       y = ensureSpaceM(doc, y, rowH, pageW);
       doc.rect(x, y, totalW, rowH);
       let cx2 = x;
+      const topPad = lineH * 0.9; // jarak dari garis atas kotak ke baseline baris pertama
       wrapped.forEach((lines,i)=>{
         if(i>0) doc.line(cx2, y, cx2, y+rowH);
         const align = (opts.centerCols && opts.centerCols.indexOf(i)!==-1) ? 'center' : 'left';
         const tx = align==='center' ? cx2+colWidths[i]/2 : cx2+1.5;
-        doc.text(lines, tx, y+3.0, {align:align, maxWidth: colWidths[i]-3});
+        doc.text(lines, tx, y+topPad, {align:align, maxWidth: colWidths[i]-3, lineHeightFactor: LHF});
         cx2 += colWidths[i];
       });
       y += rowH;
